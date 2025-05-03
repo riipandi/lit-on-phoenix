@@ -1,4 +1,4 @@
-# PhoenixLit
+# Lit on Phoenix
 
 To start your Phoenix server:
 

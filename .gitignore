@@ -29,8 +29,15 @@ phoenix_lit-*.tar
 /priv/static/assets/
 
 # Ignore digested assets cache.
-/priv/static/cache_manifest.json
+/priv/static/*
+!/priv/static/favicon.ico
+!/priv/static/robots.txt
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 node_modules/
+.elixir_ls/
+
+# Environment variables
+.env*
+!.env.example
