@@ -31,7 +31,8 @@ phoenix_lit-*.tar
 # Ignore digested assets cache.
 /priv/static/*
 !/priv/static/favicon.ico
-!/priv/static/robots.txt
+!/priv/static/favicon.ico
+!priv/static/images/logo.svg
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log

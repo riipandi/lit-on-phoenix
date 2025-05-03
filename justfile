@@ -8,10 +8,10 @@ set dotenv-path := ".env"
 set export :=  true
 
 [private]
-app_identifier := "phoenix_lit"
+app_identifier := "$(mix eval 'IO.puts Mix.Project.config[:app]')"
 
 [private]
-app_version := "0.0.0"
+app_version := "$(mix eval 'IO.puts Mix.Project.config[:version]')"
 
 [private]
 app_image := "ghcr.io/riipandi/lit-on-phoenix"
@@ -34,7 +34,7 @@ dev *args:
 [doc('Build the application')]
 [no-exit-message]
 build +MIX_ENV='prod':
-  @echo "Building the application in {{MIX_ENV}} mode..."
+  @echo "Building {{app_identifier}} v{{app_version}} in {{MIX_ENV}} mode..."
   @mix local.hex --force
   @mix local.rebar --force
   @mix deps.get --only {{MIX_ENV}}
@@ -46,7 +46,7 @@ build +MIX_ENV='prod':
 [doc('Start the application from build')]
 [no-exit-message]
 start +MIX_ENV='prod':
-  @echo "Starting the application in {{MIX_ENV}} mode..."
+  @echo "Starting {{app_identifier}} v{{app_version}} in {{MIX_ENV}} mode..."
   @_build/{{MIX_ENV}}/rel/{{app_identifier}}/bin/server
 
 [doc('Tests the application')]
@@ -88,7 +88,7 @@ docker-run *args:
 [doc('Run the Docker image')]
 [no-exit-message]
 docker-shell *args:
-  @docker run --network=host --rm -it --entrypoint /bin/sh {{app_image}}:{{app_version}} {{args}}
+  @docker run --network=host --rm -it --entrypoint /usr/bin/bash {{app_image}}:{{app_version}} {{args}}
 
 [doc('Get Docker image list')]
 docker-images:
