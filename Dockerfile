@@ -55,55 +55,57 @@ RUN --mount=type=cache,mode=0755,target=/var/cache/mix,sharing=locked mix deps.g
 # Any relevant config change will trigger the dependencies to be re-compiled.
 # Changes to config/runtime.exs don't require recompiling the code.
 COPY config/config.exs config/runtime.exs config/${MIX_ENV}.exs config/
-RUN --mount=type=cache,mode=0755,target=/var/cache/mix,sharing=locked mix deps.get --only $MIX_ENV
-# RUN --mount=type=cache,mode=0755,target=/var/cache/mix,sharing=locked mix deps.compile
+RUN --mount=type=cache,mode=0755,target=/var/cache/mix,sharing=locked \
+    mix deps.get --only ${MIX_ENV} \
+    && mix deps.compile
 
 COPY priv priv
 COPY lib lib
 COPY assets assets
 COPY rel rel
 
-# # Compile assets and the release
-# RUN mix assets.deploy
-# RUN mix compile
-# RUN mix release --overwrite --quiet
+# Compile assets and the release
+RUN . $HOME/.bashrc && mix setup
+RUN mix assets.deploy
+RUN mix compile
+RUN mix release --overwrite --quiet
 
-# # -----------------------------------------------------------------------------
-# # Production image, copy build output files and run the application.
-# # -----------------------------------------------------------------------------
-# # FROM --platform=${PLATFORM} gcr.io/distroless/cc-debian12:nonroot
-# FROM --platform=${PLATFORM} debian:bookworm-slim
+# -----------------------------------------------------------------------------
+# Production image, copy build output files and run the application.
+# -----------------------------------------------------------------------------
+# FROM --platform=${PLATFORM} gcr.io/distroless/cc-debian12:nonroot
+FROM --platform=${PLATFORM} debian:bookworm-slim
 
-# RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-# RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
-#     --mount=target=/var/cache/apt,type=cache,sharing=locked \
-#     rm -f /etc/apt/apt.conf.d/docker-clean && apt-get update -y \
-#     && apt-get -yqq --no-install-recommends install ca-certificates \
-#        libstdc++6 openssl libncurses5 locales \
-#     && apt clean && rm -f /var/lib/apt/lists/*_*
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && apt-get update -y \
+    && apt-get -yqq --no-install-recommends install ca-certificates \
+       libstdc++6 openssl libncurses5 locales \
+    && apt clean && rm -f /var/lib/apt/lists/*_*
 
-# # Set the locale
-# RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
-# ENV LANG="en_US.UTF-8"
-# ENV LANGUAGE="en_US:en"
-# ENV LC_ALL="en_US.UTF-8"
+ENV LANG="en_US.UTF-8"
+ENV LANGUAGE="en_US:en"
+ENV LC_ALL="en_US.UTF-8"
 
-# WORKDIR /app
-# RUN chown -R nobody:nogroup /app
+WORKDIR /app
+RUN chown -R nobody:nogroup /app
 
-# # set runner ENV
-# ARG MIX_ENV="prod"
-# ENV MIX_ENV="${MIX_ENV}"
+# set runner ENV
+ARG MIX_ENV="prod"
+ENV MIX_ENV="${MIX_ENV}"
 
-# # Only copy the final release from the build stage
-# COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/phoenix_lit ./
-# COPY --from=base /usr/bin/tini /usr/bin/tini
+# Only copy the final release from the build stage
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/phoenix_lit ./
+COPY --from=base /usr/bin/tini /usr/bin/tini
 
-# # Register Tini as a process subreaper.
-# ENV TINI_SUBREAPER=true
-# USER nobody:nogroup
+# Register Tini as a process subreaper.
+ENV TINI_SUBREAPER=true
+USER nobody:nogroup
 
-# # Using tini to handle zombie processes.
-# ENTRYPOINT ["/usr/bin/tini", "--"]
-# CMD ["/app/bin/server"]
+# Using tini to handle zombie processes.
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/app/bin/server"]

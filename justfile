@@ -83,12 +83,12 @@ docker-build *args:
 [doc('Run the Docker image')]
 [no-exit-message]
 docker-run *args:
-  @docker run --network=host --rm -it {{app_image}}:{{app_version}} {{args}}
+  @docker run --network=host --rm -it --env-file .env {{app_image}}:{{app_version}} {{args}}
 
 [doc('Run the Docker image')]
 [no-exit-message]
 docker-shell *args:
-  @docker run --network=host --rm -it --entrypoint /usr/bin/bash {{app_image}}:{{app_version}} {{args}}
+  @docker run --network=host --rm -it --env-file .env --entrypoint /bin/sh {{app_image}}:{{app_version}} {{args}}
 
 [doc('Get Docker image list')]
 docker-images:

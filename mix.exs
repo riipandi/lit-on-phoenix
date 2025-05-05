@@ -19,7 +19,7 @@ defmodule PhoenixLit.MixProject do
   def application do
     [
       mod: {PhoenixLit.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
