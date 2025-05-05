@@ -99,7 +99,7 @@ ARG MIX_ENV="prod"
 ENV MIX_ENV="${MIX_ENV}"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/phoenix_lit ./
+COPY --from=builder --chown=nobody:nogroup /app/_build/${MIX_ENV}/rel/phoenix_lit ./
 COPY --from=base /usr/bin/tini /usr/bin/tini
 
 # Register Tini as a process subreaper.
